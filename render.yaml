@@ -16,3 +16,15 @@ services:
         value: INFO
       - key: PYTHON_VERSION
         value: 3.12.8
+  - type: web
+    name: attendance-frontend
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && NITRO_PRESET=node-server npm run build
+    startCommand: npm run start
+    envVars:
+      - key: VITE_API_BASE
+        sync: false
+      - key: NODE_VERSION
+        value: 20

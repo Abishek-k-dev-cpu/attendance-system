@@ -160,10 +160,17 @@ Indexes on `register_number` and `attendance.subject_code` are created automatic
 
 1. Push this repo to GitHub.
 2. In Render, click **New → Blueprint** and connect the repository.
-3. Set `MONGODB_URI` and `CORS_ORIGINS` as secret environment variables.
-4. Deploy.
+3. Render will create both services:
+   - `attendance-api`
+   - `attendance-frontend`
+4. Set these secret environment variables:
+   - Backend: `MONGODB_URI`, `CORS_ORIGINS`
+   - Frontend: `VITE_API_BASE`
+5. Deploy.
 
-### Option B: Manual Web Service
+### Option B: Manual Web Services
+
+#### Backend (`attendance-api`)
 
 1. **New → Web Service** → connect your repo.
 2. Configure:
@@ -180,6 +187,25 @@ Indexes on `register_number` and `attendance.subject_code` are created automatic
 | `LOG_LEVEL` | `INFO` |
 
 4. Deploy and verify `https://<your-service>.onrender.com/health`.
+
+#### Frontend (`attendance-frontend`)
+
+1. Create another **Web Service** using the same repository.
+2. Configure:
+   - **Root Directory:** `frontend`
+   - **Runtime:** Node
+   - **Build command:** `npm install && NITRO_PRESET=node-server npm run build`
+   - **Start command:** `npm run start`
+3. Add environment variables:
+
+| Key | Value |
+|-----|-------|
+| `VITE_API_BASE` | Your backend Render URL, e.g. `https://attendance-api.onrender.com` |
+| `NODE_VERSION` | `20` |
+
+4. After the frontend is deployed, update the backend `CORS_ORIGINS` to include:
+   - `http://localhost:5173`
+   - your frontend Render URL, e.g. `https://attendance-frontend.onrender.com`
 
 ---
 
@@ -254,7 +280,26 @@ The backend automatically calculates percentage, overall attendance, and `last_u
 VITE_API_BASE=https://your-api.onrender.com
 ```
 
-> The frontend calls `GET /students/{register_number}` but this API exposes `GET /student/{register_number}`. Update `frontend/src/lib/api.ts` accordingly.
+The frontend adapter in `frontend/src/lib/api.ts` already maps the backend response from:
+
+- `GET /student/{register_number}`
+- `snake_case` API fields
+
+into the UI's existing `camelCase` model.
+
+For local frontend development:
+
+```env
+VITE_API_BASE=https://your-api.onrender.com
+```
+
+Create `frontend/.env` from `frontend/.env.example`, then run:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ---
 
@@ -276,4 +321,3 @@ curl https://your-api.onrender.com/statistics
 - Input sanitization on text fields
 - Unique index on `register_number` prevents duplicates
 - CORS restricted to configured origins
-"# attendance-system" 

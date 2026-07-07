@@ -2,6 +2,7 @@ import logging
 from collections.abc import AsyncGenerator
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from pymongo.errors import OperationFailure
 
 from app.database.config import get_settings
 
@@ -20,7 +21,17 @@ async def connect_to_mongodb() -> None:
     _client = AsyncIOMotorClient(settings.mongodb_uri)
     _database = _client[settings.database_name]
 
-    await _client.admin.command("ping")
+    try:
+        await _client.admin.command("ping")
+    except OperationFailure as exc:
+        if exc.code == 8000 or "authentication failed" in str(exc).lower():
+            logger.error(
+                "MongoDB authentication failed. Check MONGODB_URI on Render: "
+                "use the Database Access username/password (not your Atlas login), "
+                "URL-encode special characters in the password, and redeploy."
+            )
+        raise
+
     await _ensure_indexes()
     logger.info("MongoDB connection established")
 
