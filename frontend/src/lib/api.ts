@@ -1,4 +1,5 @@
 import axios from "axios";
+import { isAxiosError } from "axios";
 import { findStudent, type Student } from "./mockData";
 
 // In production, point this to your REST API base URL.
@@ -48,8 +49,21 @@ function toUiStudent(student: BackendStudent): Student {
 export async function fetchStudent(registerNumber: string): Promise<Student> {
   // If API is configured, use it. Otherwise fall back to mock data.
   if (API_BASE) {
-    const { data } = await api.get<BackendStudent>(`/student/${encodeURIComponent(registerNumber)}`);
-    return toUiStudent(data);
+    try {
+      const { data } = await api.get<BackendStudent>(
+        `/student/${encodeURIComponent(registerNumber.trim())}`,
+      );
+      return toUiStudent(data);
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        throw new Error("Student not found. Please verify the register number and try again.");
+      }
+      if (isAxiosError(error) && error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        throw new Error(typeof detail === "string" ? detail : "Unable to fetch student record.");
+      }
+      throw new Error("Unable to connect to the attendance server. Please try again.");
+    }
   }
   await new Promise((r) => setTimeout(r, 900));
   const student = findStudent(registerNumber);

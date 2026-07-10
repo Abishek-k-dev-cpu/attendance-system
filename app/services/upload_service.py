@@ -12,8 +12,8 @@ from app.services.student_service import StudentService
 from app.utils import (
     ValidationError,
     calculate_percentage,
+    normalize_register_number_input,
     validate_attendance_counts,
-    validate_register_number,
     validate_upload_file,
 )
 
@@ -103,8 +103,8 @@ class UploadService:
         buffer = io.BytesIO(content)
         try:
             if extension == ".csv":
-                return pd.read_csv(buffer)
-            return pd.read_excel(buffer, engine="openpyxl")
+                return pd.read_csv(buffer, dtype=str, keep_default_na=False)
+            return pd.read_excel(buffer, engine="openpyxl", dtype=str)
         except Exception as exc:
             raise ValidationError(f"Unable to read file: {exc}") from exc
 
@@ -125,7 +125,7 @@ class UploadService:
         if pd.isna(row["register_number"]) or str(row["register_number"]).strip() == "":
             raise ValidationError("Register number is missing.")
 
-        register_number = validate_register_number(str(row["register_number"]))
+        register_number = normalize_register_number_input(row["register_number"])
         name = self._require_text(row["name"], "Student name")
         department = self._require_text(row["department"], "Department")
         year = self._require_text(row["year"], "Year")
