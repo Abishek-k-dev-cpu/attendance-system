@@ -6,16 +6,22 @@ REGISTER_NUMBER_PATTERN = re.compile(r"^[A-Za-z0-9\-_/]+$")
 SCIENTIFIC_NOTATION_PATTERN = re.compile(r"^[\d.]+\s*[Ee]\s*[+-]?\d+$")
 
 
+def _clean_text(value: str) -> str:
+    return value.replace("\ufeff", "").replace("\u00a0", "").strip()
+
+
 def normalize_register_number_input(value: object) -> str:
     if value is None:
         raise ValidationError("Register number is missing.")
 
-    if isinstance(value, float):
+    if isinstance(value, int):
+        text = str(value)
+    elif isinstance(value, float):
         if value != value:  # NaN
             raise ValidationError("Register number is missing.")
         text = f"{value:.0f}" if value.is_integer() else str(value)
     else:
-        text = str(value).strip()
+        text = _clean_text(str(value))
 
     if not text or text.lower() == "nan":
         raise ValidationError("Register number is missing.")
@@ -34,7 +40,7 @@ def normalize_register_number_input(value: object) -> str:
 
 
 def validate_register_number(register_number: str) -> str:
-    value = register_number.strip().upper()
+    value = _clean_text(register_number).upper()
     if not value:
         raise ValidationError("Register number is required.")
     if len(value) > 50:

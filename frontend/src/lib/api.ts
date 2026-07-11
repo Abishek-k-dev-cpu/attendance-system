@@ -1,11 +1,8 @@
-import axios from "axios";
-import { isAxiosError } from "axios";
+import axios, { isAxiosError } from "axios";
+import { getApiBase } from "./api-config";
 import { findStudent, type Student } from "./mockData";
 
-// In production, point this to your REST API base URL.
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
-
-export const api = axios.create({ baseURL: API_BASE, timeout: 8000 });
+export const api = axios.create({ timeout: 15000 });
 
 interface BackendSubjectAttendance {
   subject_code: string;
@@ -47,11 +44,12 @@ function toUiStudent(student: BackendStudent): Student {
 }
 
 export async function fetchStudent(registerNumber: string): Promise<Student> {
-  // If API is configured, use it. Otherwise fall back to mock data.
-  if (API_BASE) {
+  const apiBase = getApiBase();
+
+  if (apiBase) {
     try {
       const { data } = await api.get<BackendStudent>(
-        `/student/${encodeURIComponent(registerNumber.trim())}`,
+        `${apiBase}/student/${encodeURIComponent(registerNumber.trim())}`,
       );
       return toUiStudent(data);
     } catch (error) {
@@ -65,10 +63,13 @@ export async function fetchStudent(registerNumber: string): Promise<Student> {
       throw new Error("Unable to connect to the attendance server. Please try again.");
     }
   }
+
   await new Promise((r) => setTimeout(r, 900));
   const student = findStudent(registerNumber);
   if (!student) {
-    throw new Error("Student not found. Please verify the register number and try again.");
+    throw new Error(
+      "Student not found. The attendance API is not configured on this site yet. Please contact the administrator.",
+    );
   }
   return student;
 }

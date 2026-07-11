@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+const API_BASE = (process.env.VITE_API_BASE ?? "").replace(/\/$/, "");
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -108,6 +110,13 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {API_BASE ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.__ATTENDANCE_API_BASE__=${JSON.stringify(API_BASE)};`,
+            }}
+          />
+        ) : null}
       </head>
       <body>
         {children}

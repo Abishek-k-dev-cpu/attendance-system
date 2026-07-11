@@ -79,6 +79,18 @@ class UploadService:
                 logger.warning("Upload row %s failed: %s", row_number, exc)
 
         await self._store_upload_history(filename, summary)
+
+        if summary.added == 0 and summary.updated == 0 and summary.failed == 0:
+            raise ValidationError(
+                "No attendance rows were imported. Check that the file has data below the header row."
+            )
+
+        if summary.added == 0 and summary.updated == 0 and summary.failed > 0:
+            raise ValidationError(
+                "Upload failed for all rows. Fix the file and try again. "
+                f"First error: {summary.errors[0]}"
+            )
+
         logger.info(
             "Upload success — added: %s, updated: %s, failed: %s",
             summary.added,
