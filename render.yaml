@@ -11,7 +11,7 @@ services:
       - key: DATABASE_NAME
         value: attendance_portal
       - key: CORS_ORIGINS
-        sync: false
+        value: https://attendance-frontend-kmtk.onrender.com,http://localhost:5173
       - key: LOG_LEVEL
         value: INFO
       - key: PYTHON_VERSION
@@ -25,6 +25,6 @@ services:
     startCommand: npm run start
     envVars:
       - key: VITE_API_BASE
-        sync: false
+        value: https://attendance-api-kmtk.onrender.com
       - key: NODE_VERSION
         value: 20

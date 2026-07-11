@@ -12,7 +12,10 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
-const API_BASE = (process.env.VITE_API_BASE ?? "").replace(/\/$/, "");
+const API_BASE = (import.meta.env.VITE_API_BASE ?? process.env.VITE_API_BASE ?? "").replace(
+  /\/$/,
+  "",
+);
 
 function NotFoundComponent() {
   return (
@@ -110,6 +113,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {API_BASE ? <meta name="attendance-api-base" content={API_BASE} /> : null}
         {API_BASE ? (
           <script
             dangerouslySetInnerHTML={{
