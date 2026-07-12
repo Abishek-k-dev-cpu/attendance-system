@@ -11,7 +11,8 @@ services:
       - key: DATABASE_NAME
         value: attendance_portal
       - key: CORS_ORIGINS
-        value: https://attendance-frontend-kmtk.onrender.com,http://localhost:5173
+        value:  https://attendance-system-frontend-tl66.onrender.com,http://localhost:5173
+         sync: false
       - key: LOG_LEVEL
         value: INFO
       - key: PYTHON_VERSION
