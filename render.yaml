@@ -12,7 +12,8 @@ services:
         value: attendance_portal
       - key: CORS_ORIGINS
         value:  https://attendance-system-frontend-tl66.onrender.com,http://localhost:5173
-         sync: false
+      - key: CORS_ORIGINS
+        sync: false
       - key: LOG_LEVEL
         value: INFO
       - key: PYTHON_VERSION
